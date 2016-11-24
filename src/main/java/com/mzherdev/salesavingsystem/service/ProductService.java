@@ -15,4 +15,6 @@ public interface ProductService {
 	Product getProduct(int productId);
 
 	List<Product> getAllProducts();
+
+	void evictCache();
 }

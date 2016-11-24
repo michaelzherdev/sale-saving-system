@@ -22,7 +22,6 @@ public class OrderItem implements Serializable {
     private int quantity;
 
     @Column
-    @NotNull
     private double sum;
 
     @ManyToOne(cascade = CascadeType.ALL)

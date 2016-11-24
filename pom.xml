@@ -12,6 +12,7 @@
         <encoding>UTF-8</encoding>
         <spring.version>4.2.6.RELEASE</spring.version>
         <postgres.version>9.4.1208</postgres.version>
+        <junit.version>4.12</junit.version>
     </properties>
 
     <dependencies>
@@ -53,6 +54,18 @@
             <artifactId>spring-orm</artifactId>
             <version>${spring.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>${spring.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
         <!--Hibernate-->
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -99,6 +112,31 @@
             <artifactId>postgresql</artifactId>
             <version>${postgres.version}</version>
         </dependency>
+        <!--Test-->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+            <version>2.2.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--Cache-->
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>2.10.1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -134,6 +172,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>

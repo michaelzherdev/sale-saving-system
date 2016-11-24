@@ -12,6 +12,9 @@ import java.time.LocalDateTime;
 @Table(name = "discounts")
 public class Discount implements Serializable {
 
+    public static final int MIN_DISCOUNT_AMOUNT = 5;
+    public static final int MAX_DISCOUNT_AMOUNT = 10;
+
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)

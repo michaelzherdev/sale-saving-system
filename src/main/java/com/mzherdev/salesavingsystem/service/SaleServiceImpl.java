@@ -3,6 +3,8 @@ package com.mzherdev.salesavingsystem.service;
 import com.mzherdev.salesavingsystem.repository.SaleRepository;
 import com.mzherdev.salesavingsystem.model.Sale;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,16 +17,19 @@ public class SaleServiceImpl implements SaleService{
 	private SaleRepository saleRepository;
 
 	@Override
+	@CacheEvict(value = "sales", allEntries = true)
 	public Sale add(Sale sale) {
 		return saleRepository.add(sale);
 	}
 
 	@Override
+	@CacheEvict(value = "sales", allEntries = true)
 	public void edit(Sale sale) {
 		saleRepository.edit(sale);
 	}
 
 	@Override
+	@CacheEvict(value = "sales", allEntries = true)
 	public void delete(int saleId) {
 		saleRepository.delete(saleId);
 	}
@@ -45,7 +50,12 @@ public class SaleServiceImpl implements SaleService{
 	}
 
 	@Override
+	@Cacheable("sales")
 	public List<Sale> getAllSales() {
 		return saleRepository.getAllSales();
 	}
+
+	@Override
+	@CacheEvict(value = "sales", allEntries = true)
+	public void evictCache() {}
 }

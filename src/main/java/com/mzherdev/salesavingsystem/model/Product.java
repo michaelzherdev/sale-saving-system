@@ -1,8 +1,13 @@
 package com.mzherdev.salesavingsystem.model;
 
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.Cache;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -12,11 +17,23 @@ import java.util.Set;
 
 @Entity
 @Table(name = "products")
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Product implements Serializable {
 
 	private static final long serialVersionUID = -5461065208725881504L;
 
 	public Product() {
+	}
+
+	//for test mock
+	public Product(String name, double price) {
+		this.name = name;
+		this.price = price;
+	}
+
+	public Product(int id, String name, double price) {
+		this(name, price);
+		this.id = id;
 	}
 
 	@Id
@@ -34,9 +51,11 @@ public class Product implements Serializable {
 	
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "product")
 	@OrderBy("id DESC")
+	@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 	private Set<OrderItem> items = new HashSet<>();
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "product")
+	@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 	private Set<Discount> discounts = new HashSet<>();
 
 	public int getId() {
@@ -48,11 +67,11 @@ public class Product implements Serializable {
 	}
 
 	public String getName() {
-		return name;
+		return name.trim();
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		this.name = name.trim();
 	}
 
 	public double getPrice() {

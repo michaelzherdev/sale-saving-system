@@ -5,6 +5,7 @@ import com.mzherdev.salesavingsystem.model.Product;
 import com.mzherdev.salesavingsystem.service.DiscountService;
 import com.mzherdev.salesavingsystem.service.ProductService;
 import com.mzherdev.salesavingsystem.tools.TimeUtils;
+import org.apache.log4j.spi.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -32,8 +34,11 @@ public class ProductController {
     @Autowired
     private DiscountService discountService;
 
+    private static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String index() {
+        executorService.scheduleAtFixedRate(new DiscountChangeTask(), 0, 1, TimeUnit.HOURS);
         return "redirect:/products";
     }
 
@@ -43,7 +48,6 @@ public class ProductController {
 
         LocalDateTime now = LocalDateTime.now();
 
-//TODO        it`s possible to use SchedulerExecutorService for changing discount
         Optional<Discount> optionalDiscount = discountService.getAllDiscounts()
                 .stream()
                 .filter(d -> TimeUtils.isBetween(now, d.getTimeStart(), d.getTimeEnd()))
@@ -54,21 +58,7 @@ public class ProductController {
         if (optionalDiscount.isPresent()) {
             discount = optionalDiscount.get();
         } else {
-            int minDiscount = 5;
-            int maxDiscount = 10;
-            int amount = ThreadLocalRandom.current().nextInt(minDiscount, maxDiscount + 1);
-
-            int randomProductIndex = ThreadLocalRandom.current().nextInt(products.size());
-            Product product = products.get(randomProductIndex);
-
-            LocalDateTime startDate = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(), now.getHour(), 0, 0);
-            LocalDateTime endDate = startDate.plusHours(1);
-
-            discount = new Discount(startDate, endDate, amount, product);
-            discountService.add(discount);
-
-            product.getDiscounts().add(discount);
-            productService.edit(product);
+            discount = new Discount();
         }
 
         model.addAttribute("discount", discount);
@@ -151,5 +141,38 @@ public class ProductController {
     public String showAllDiscounts(Model model) {
         model.addAttribute("discounts", discountService.getAllDiscounts());
         return "discounts/discountlist";
+    }
+
+    private class DiscountChangeTask implements Runnable {
+        @Override
+        public void run() {
+            org.slf4j.LoggerFactory.getLogger(getClass().getSimpleName()).info("run " + LocalDateTime.now());
+            List<Product> products = productService.getAllProducts();
+
+            LocalDateTime now = LocalDateTime.now();
+            Optional<Discount> optionalDiscount = discountService.getAllDiscounts()
+                    .stream()
+                    .filter(d -> TimeUtils.isBetween(now, d.getTimeStart(), d.getTimeEnd()))
+                    .findAny();
+
+            if (!optionalDiscount.isPresent()) {
+                int minDiscount = Discount.MIN_DISCOUNT_AMOUNT;
+                int maxDiscount = Discount.MAX_DISCOUNT_AMOUNT;
+                int amount = ThreadLocalRandom.current().nextInt(minDiscount, maxDiscount + 1);
+
+                int randomProductIndex = ThreadLocalRandom.current().nextInt(products.size());
+                Product product = products.get(randomProductIndex);
+
+//                LocalDateTime startDate = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(), now.getHour(), 0, 0);
+                LocalDateTime startDate = now;
+                LocalDateTime endDate = startDate.plusHours(1);
+
+                Discount discount = new Discount(startDate, endDate, amount, product);
+                discountService.add(discount);
+
+                product.getDiscounts().add(discount);
+                productService.edit(product);
+            }
+        }
     }
 }

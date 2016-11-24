@@ -21,4 +21,5 @@ public interface SaleService {
 
 	List<Sale> getAllSales();
 
+	void evictCache();
 }

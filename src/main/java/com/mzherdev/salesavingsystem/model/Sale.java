@@ -1,9 +1,13 @@
 package com.mzherdev.salesavingsystem.model;
 
 import com.mzherdev.salesavingsystem.tools.TimeUtils;
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.Cache;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -14,11 +18,19 @@ import java.util.List;
 
 @Entity
 @Table(name = "sales")
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Sale implements Serializable {
 
 	private static final long serialVersionUID = 5789981007587667953L;
 
 	public Sale() {
+	}
+
+	//for test mock
+	public Sale(LocalDateTime date, double cost, double costWithDiscount) {
+		this.date = date;
+		this.cost = cost;
+		this.costWithDiscount = costWithDiscount;
 	}
 
 	@Id
@@ -30,13 +42,15 @@ public class Sale implements Serializable {
 	private LocalDateTime date;
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "sale")
+	@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 	private List<OrderItem> items = new ArrayList<OrderItem>();
 
 	@Column
 	@NotNull
 	private double cost;
 
-	@Column
+	@Column(name = "cost_with_discount")
+	@NotNull
 	private double costWithDiscount;
 
 	public int getId() {
@@ -83,9 +97,7 @@ public class Sale implements Serializable {
 		return items.size();
 	}
 
-//	needed for jsp as jsp doesn`t know about new java.time api
 	public String getLocalDateTimeAsString() {
-//		return date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
 		return TimeUtils.toString(date);
 	}
 
