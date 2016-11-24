@@ -34,11 +34,8 @@ public class ProductController {
     @Autowired
     private DiscountService discountService;
 
-    private static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String index() {
-        executorService.scheduleAtFixedRate(new DiscountChangeTask(), 0, 1, TimeUnit.HOURS);
         return "redirect:/products";
     }
 
@@ -141,38 +138,5 @@ public class ProductController {
     public String showAllDiscounts(Model model) {
         model.addAttribute("discounts", discountService.getAllDiscounts());
         return "discounts/discountlist";
-    }
-
-    private class DiscountChangeTask implements Runnable {
-        @Override
-        public void run() {
-            org.slf4j.LoggerFactory.getLogger(getClass().getSimpleName()).info("run " + LocalDateTime.now());
-            List<Product> products = productService.getAllProducts();
-
-            LocalDateTime now = LocalDateTime.now();
-            Optional<Discount> optionalDiscount = discountService.getAllDiscounts()
-                    .stream()
-                    .filter(d -> TimeUtils.isBetween(now, d.getTimeStart(), d.getTimeEnd()))
-                    .findAny();
-
-            if (!optionalDiscount.isPresent()) {
-                int minDiscount = Discount.MIN_DISCOUNT_AMOUNT;
-                int maxDiscount = Discount.MAX_DISCOUNT_AMOUNT;
-                int amount = ThreadLocalRandom.current().nextInt(minDiscount, maxDiscount + 1);
-
-                int randomProductIndex = ThreadLocalRandom.current().nextInt(products.size());
-                Product product = products.get(randomProductIndex);
-
-//                LocalDateTime startDate = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(), now.getHour(), 0, 0);
-                LocalDateTime startDate = now;
-                LocalDateTime endDate = startDate.plusHours(1);
-
-                Discount discount = new Discount(startDate, endDate, amount, product);
-                discountService.add(discount);
-
-                product.getDiscounts().add(discount);
-                productService.edit(product);
-            }
-        }
     }
 }

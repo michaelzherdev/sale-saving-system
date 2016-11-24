@@ -16,6 +16,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -33,6 +34,7 @@ import java.sql.SQLException;
 @ComponentScan({"com.mzherdev.salesavingsystem"})
 @PropertySource("classpath:db/db.properties")
 @EnableCaching
+@EnableScheduling
 public class WebConfig extends WebMvcConfigurerAdapter {
 
     @Autowired
