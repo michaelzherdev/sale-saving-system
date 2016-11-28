@@ -1,6 +1,7 @@
 package com.mzherdev.salesavingsystem.config;
 
 import com.mzherdev.salesavingsystem.tools.JpaUtils;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -26,6 +27,8 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 
 import javax.sql.DataSource;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 
 @Configuration
@@ -56,13 +59,31 @@ public class WebConfig extends WebMvcConfigurerAdapter {
     }
 
     @Bean
-    public DataSource dataSource() {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(environment.getProperty("db.driverClassName"));
-        dataSource.setUrl(environment.getProperty("db.databaseurl"));
-        dataSource.setUsername(environment.getProperty("db.username"));
-        dataSource.setPassword(environment.getProperty("db.password"));
-        return dataSource;
+    public BasicDataSource dataSource()  {
+        URI dbUri = null;
+        try {
+//            dbUri = new URI("postgres://postgres:1@localhost:5432/salesystem");
+            dbUri = dbUri();
+        } catch (URISyntaxException e) { }
+
+        String username = dbUri.getUserInfo().split(":")[0];
+        String password = dbUri.getUserInfo().split(":")[1];
+        String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
+
+        BasicDataSource basicDataSource = new BasicDataSource();
+        basicDataSource.setUrl(dbUrl);
+        basicDataSource.setUsername(username);
+        basicDataSource.setPassword(password);
+
+        return basicDataSource;
+    }
+
+    @Bean
+    URI dbUri() throws URISyntaxException {
+//      // local
+//        return new URI(environment.getProperty("db.heroku.local"));
+        // remote
+        return new URI(environment.getProperty("db.heroku.remote"));
     }
 
     @Bean

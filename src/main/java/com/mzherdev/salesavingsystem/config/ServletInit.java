@@ -16,8 +16,6 @@ import java.util.Arrays;
 
 public class ServletInit extends AbstractAnnotationConfigDispatcherServletInitializer {
 
-    Logger log = LoggerFactory.getLogger(ServletInit.class.getSimpleName());
-
     @Override
     protected Class<?>[] getServletConfigClasses() {
         return new Class[] { WebConfig.class };
@@ -40,7 +38,6 @@ public class ServletInit extends AbstractAnnotationConfigDispatcherServletInitia
         ctx.register(WebConfig.class);
         ctx.setServletContext(servletContext);
         ctx.refresh();
-        log.info("BeanDefinitionNames: " + Arrays.toString(ctx.getBeanDefinitionNames()));
 
         FilterRegistration.Dynamic encodingFilter = servletContext.addFilter("encoding-filter", new CharacterEncodingFilter());
         encodingFilter.setInitParameter("encoding", "UTF-8");
