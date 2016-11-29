@@ -62,9 +62,10 @@ public class WebConfig extends WebMvcConfigurerAdapter {
     public BasicDataSource dataSource()  {
         URI dbUri = null;
         try {
-//            dbUri = new URI("postgres://postgres:1@localhost:5432/salesystem");
-            dbUri = dbUri();
-        } catch (URISyntaxException e) { }
+            dbUri = new URI(System.getenv("DATABASE_URL"));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
 
         String username = dbUri.getUserInfo().split(":")[0];
         String password = dbUri.getUserInfo().split(":")[1];
@@ -76,14 +77,6 @@ public class WebConfig extends WebMvcConfigurerAdapter {
         basicDataSource.setPassword(password);
 
         return basicDataSource;
-    }
-
-    @Bean
-    URI dbUri() throws URISyntaxException {
-//      // local
-//        return new URI(environment.getProperty("db.heroku.local"));
-        // remote
-        return new URI(environment.getProperty("db.heroku.remote"));
     }
 
     @Bean
