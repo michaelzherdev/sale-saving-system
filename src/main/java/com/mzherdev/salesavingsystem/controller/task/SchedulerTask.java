@@ -47,7 +47,7 @@ public class SchedulerTask {
             Product product = products.get(randomProductIndex);
 
             LocalDateTime startDate = now;
-            LocalDateTime endDate = startDate.plusHours(1);
+            LocalDateTime endDate = startDate.plusHours(1).minusMinutes(1);
 
             Discount discount = new Discount(startDate, endDate, amount, product);
             discountService.add(discount);
