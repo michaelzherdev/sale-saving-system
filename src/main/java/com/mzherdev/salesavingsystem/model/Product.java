@@ -82,7 +82,7 @@ public class Product implements Serializable {
 	}
 
 	public BigDecimal getPrice() {
-		return price;
+		return price.setScale(2, RoundingMode.HALF_UP);
 	}
 
 	public void setPrice(BigDecimal price) {

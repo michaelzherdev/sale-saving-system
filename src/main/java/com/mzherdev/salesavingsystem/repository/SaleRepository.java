@@ -16,14 +16,4 @@ import com.mzherdev.salesavingsystem.model.Stats;
 public interface SaleRepository extends JpaRepository<Sale, Integer> {
 	@Query("SELECT s FROM Sale s WHERE s.date BETWEEN ?1 AND ?2 ORDER BY s.date DESC")
 	List<Sale> getBetween(LocalDateTime startDate, LocalDateTime endDate);
-
-//	@Query(value = "SELECT date_part('hour', s.date), count(*) as sales_count , sum(s.cost) as common_cost, avg(s.cost) as avg_cost,\n" +
-//			"  sum(s.cost_with_discount) as common_cost_with_discount, avg(s.cost_with_discount) as avg_cost_with_discount,\n" +
-//			"  (sum(s.cost) - sum(s.cost_with_discount)) as diff\n" +
-//			"FROM sales s\n" +
-//			"GROUP BY date_part('hour', s.date)", nativeQuery = true)
-//	List<Stats> getStatisticsForCurrentDay();
-
-
-
 }

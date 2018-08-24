@@ -1,6 +1,7 @@
 package com.mzherdev.salesavingsystem.model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class Stats {
 
@@ -48,7 +49,7 @@ public class Stats {
     }
 
     public BigDecimal getCostCommon() {
-        return costCommon;
+        return costCommon.setScale(2, RoundingMode.HALF_UP);
     }
 
     public void setCostCommon(BigDecimal costCommon) {
@@ -56,7 +57,7 @@ public class Stats {
     }
 
     public BigDecimal getCostAverage() {
-        return costAverage;
+        return costAverage.setScale(2, RoundingMode.HALF_UP);
     }
 
     public void setCostAverage(BigDecimal costAverage) {
@@ -64,7 +65,7 @@ public class Stats {
     }
 
     public BigDecimal getDiscountSum() {
-        return discountSum;
+        return discountSum.setScale(2, RoundingMode.HALF_UP);
     }
 
     public void setDiscountSum(BigDecimal discountSum) {
@@ -72,7 +73,7 @@ public class Stats {
     }
 
     public BigDecimal getCostCommonWithDiscounts() {
-        return costCommonWithDiscounts;
+        return costCommonWithDiscounts.setScale(2, RoundingMode.HALF_UP);
     }
 
     public void setCostCommonWithDiscounts(BigDecimal costCommonWithDiscounts) {
@@ -80,7 +81,7 @@ public class Stats {
     }
 
     public BigDecimal getCostAverageWithDiscounts() {
-        return costAverageWithDiscounts;
+        return costAverageWithDiscounts.setScale(2, RoundingMode.HALF_UP);
     }
 
     public void setCostAverageWithDiscounts(BigDecimal costAverageWithDiscounts) {

@@ -32,3 +32,8 @@
 #### Обязательно:
 Spring, Apache Tomcat, JPA (Hibernate), MVN/Gradle
 
+#### Варианты запуска:
+    1. mvn spring-boot:run
+    2. Запустить com.mzherdev.salesavingsystem.BootApplication
+
+
