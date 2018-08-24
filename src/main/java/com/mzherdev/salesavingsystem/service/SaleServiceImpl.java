@@ -1,16 +1,19 @@
 package com.mzherdev.salesavingsystem.service;
 
-import com.mzherdev.salesavingsystem.repository.SaleRepository;
-import com.mzherdev.salesavingsystem.model.Sale;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import com.mzherdev.salesavingsystem.model.Sale;
+import com.mzherdev.salesavingsystem.repository.SaleRepository;
 
-@Service
+@Service("saleService")
+@Transactional
 public class SaleServiceImpl implements SaleService{
 	
 	@Autowired
@@ -18,25 +21,20 @@ public class SaleServiceImpl implements SaleService{
 
 	@Override
 	@CacheEvict(value = "sales", allEntries = true)
-	public Sale add(Sale sale) {
-		return saleRepository.add(sale);
-	}
-
-	@Override
-	@CacheEvict(value = "sales", allEntries = true)
-	public void edit(Sale sale) {
-		saleRepository.edit(sale);
+	public Sale save(Sale sale) {
+		return saleRepository.save(sale);
 	}
 
 	@Override
 	@CacheEvict(value = "sales", allEntries = true)
 	public void delete(int saleId) {
-		saleRepository.delete(saleId);
+
+		saleRepository.delete(findById(saleId));
 	}
 
 	@Override
-	public Sale getSale(int saleId) {
-		return saleRepository.getSale(saleId);
+	public Sale findById(int saleId) {
+		return saleRepository.findById(saleId).orElse(null);
 	}
 
 	@Override
@@ -45,14 +43,9 @@ public class SaleServiceImpl implements SaleService{
 	}
 
 	@Override
-	public Sale getEarliestSale() {
-		return saleRepository.getEarliestSale();
-	}
-
-	@Override
 	@Cacheable("sales")
 	public List<Sale> getAllSales() {
-		return saleRepository.getAllSales();
+		return saleRepository.findAll();
 	}
 
 	@Override

@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/salesystem
+    username: postgres
+    password: postgres
+  jpa:
+    show-sql: false
+    properties:
+     hibernate:
+      jdbc:
+       lob:
+        non_contextual_creation: true
+    hibernate:
+      ddl-auto: update
+      cashe:
+        use_second_level_cache: true
+        use_query_cache: false
+        factory_class: org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
+server:
+  port: 8050

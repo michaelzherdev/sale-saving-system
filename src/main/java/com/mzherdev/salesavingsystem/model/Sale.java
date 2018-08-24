@@ -1,20 +1,25 @@
 package com.mzherdev.salesavingsystem.model;
 
-import com.mzherdev.salesavingsystem.tools.TimeUtils;
-import org.hibernate.annotations.*;
-import org.hibernate.annotations.Cache;
-import org.hibernate.validator.constraints.NotEmpty;
-
-import javax.persistence.*;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import com.mzherdev.salesavingsystem.tools.TimeUtils;
 
 @Entity
 @Table(name = "sales")
@@ -24,10 +29,12 @@ public class Sale implements Serializable {
 	private static final long serialVersionUID = 5789981007587667953L;
 
 	public Sale() {
+		this.cost = BigDecimal.ZERO;
+		this.costWithDiscount = BigDecimal.ZERO;
 	}
 
 	//for test mock
-	public Sale(LocalDateTime date, double cost, double costWithDiscount) {
+	public Sale(LocalDateTime date, BigDecimal cost, BigDecimal costWithDiscount) {
 		this.date = date;
 		this.cost = cost;
 		this.costWithDiscount = costWithDiscount;
@@ -47,11 +54,11 @@ public class Sale implements Serializable {
 
 	@Column
 	@NotNull
-	private double cost;
+	private BigDecimal cost;
 
 	@Column(name = "cost_with_discount")
 	@NotNull
-	private double costWithDiscount;
+	private BigDecimal costWithDiscount;
 
 	public int getId() {
 		return id;
@@ -77,19 +84,19 @@ public class Sale implements Serializable {
 		this.items = items;
 	}
 
-	public double getCost() {
-	return new BigDecimal(cost).setScale(2, RoundingMode.HALF_UP).doubleValue();
+	public BigDecimal getCost() {
+	return cost;
 	}
 
-	public void setCost(double cost) {
+	public void setCost(BigDecimal cost) {
 		this.cost = cost;
 	}
 
-	public double getCostWithDiscount() {
-		return new BigDecimal(costWithDiscount).setScale(2, RoundingMode.HALF_UP).doubleValue();
+	public BigDecimal getCostWithDiscount() {
+		return costWithDiscount;
 	}
 
-	public void setCostWithDiscount(double costWithDiscount) {
+	public void setCostWithDiscount(BigDecimal costWithDiscount) {
 		this.costWithDiscount = costWithDiscount;
 	}
 

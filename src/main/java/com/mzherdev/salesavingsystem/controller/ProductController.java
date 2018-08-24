@@ -1,142 +1,116 @@
 package com.mzherdev.salesavingsystem.controller;
 
-import com.mzherdev.salesavingsystem.model.Discount;
-import com.mzherdev.salesavingsystem.model.Product;
-import com.mzherdev.salesavingsystem.service.DiscountService;
-import com.mzherdev.salesavingsystem.service.ProductService;
-import com.mzherdev.salesavingsystem.tools.TimeUtils;
-import org.apache.log4j.spi.LoggerFactory;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.nio.charset.Charset;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-import java.util.concurrent.*;
+import com.mzherdev.salesavingsystem.model.Discount;
+import com.mzherdev.salesavingsystem.model.Product;
+import com.mzherdev.salesavingsystem.service.DiscountService;
+import com.mzherdev.salesavingsystem.service.ProductService;
 
 @Controller
 public class ProductController {
 
-    @Autowired
-    private ProductService productService;
+	@Autowired
+	private ProductService productService;
 
-    @Autowired
-    private DiscountService discountService;
+	@Autowired
+	private DiscountService discountService;
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String index() {
-        return "redirect:/products";
-    }
+	@GetMapping(value = "/")
+	public String index() {
+		return "redirect:/products";
+	}
 
-    @RequestMapping(value = "/products", method = RequestMethod.GET)
-    public String showAllProducts(Model model) {
-        List<Product> products = productService.getAllProducts();
+	@GetMapping(value = "/products")
+	public String showAllProducts(Model model) {
+		List<Product> products = productService.getAllProducts();
+		Discount discount = discountService.findActiveDiscount(LocalDateTime.now());
+		model.addAttribute("discount", discount != null ? discount : new Discount());
+		model.addAttribute("products", products);
+		return "products/list";
+	}
 
-        LocalDateTime now = LocalDateTime.now();
+	@PostMapping(value = "/products")
+	public String editProduct(
+			@ModelAttribute("productForm") @Validated Product product,
+			BindingResult result, Model model,
+			final RedirectAttributes redirectAttributes) {
 
-        Optional<Discount> optionalDiscount = discountService.getAllDiscounts()
-                .stream()
-                .filter(d -> TimeUtils.isBetween(now, d.getTimeStart(), d.getTimeEnd()))
-                .findAny();
+		if (result.hasErrors()) {
+			return "products/productform";
+		} else {
 
-        Discount discount;
+			// Add message to flash scope
+			redirectAttributes.addFlashAttribute("css", "success");
+			redirectAttributes.addFlashAttribute("msg",
+					product.isNew() ? "Product Added Successfully!" : "Product Updated Successfully!");
+			productService.save(product);
+			return "redirect:/products/" + product.getId();
 
-        if (optionalDiscount.isPresent()) {
-            discount = optionalDiscount.get();
-        } else {
-            discount = new Discount();
-        }
+		}
+	}
 
-        model.addAttribute("discount", discount);
-        model.addAttribute("products", products);
-        return "products/list";
-    }
+	// show add product form
+	@GetMapping(value = "/products/add")
+	public String showAddProductForm(Model model) {
+		Product product = new Product();
+		product.setName("");
+		product.setPrice(BigDecimal.ZERO);
+		model.addAttribute("productForm", product);
+		return "products/productform";
+	}
 
-    @RequestMapping(value = "/products", method = RequestMethod.POST)
-    public String editProduct(
-            @ModelAttribute("productForm") @Validated Product product,
-            BindingResult result, Model model,
-            final RedirectAttributes redirectAttributes) {
+	// show update form
+	@GetMapping(value = "/products/{id}/update")
+	public String showUpdateProductForm(@PathVariable("id") int id, Model model) {
+		Product product = productService.findById(id);
+		model.addAttribute("productForm", product);
+		return "products/productform";
+	}
 
-        if (result.hasErrors()) {
-            return "products/productform";
-        } else {
+	@PostMapping(value = "/products/{id}/delete")
+	public String deleteProduct(@PathVariable("id") int id,
+								final RedirectAttributes redirectAttributes) {
+		try {
+			productService.delete(id);
+		} catch (Exception e) {
+			return "exception";
+		}
 
-            // Add message to flash scope
-            redirectAttributes.addFlashAttribute("css", "success");
-            if (product.isNew()) {
-                redirectAttributes.addFlashAttribute("msg",
-                        "Product Added Successfully!");
-                productService.add(product);
-            } else {
-                redirectAttributes.addFlashAttribute("msg",
-                        "Product Updated Successfully!");
-                productService.edit(product);
-            }
-            return "redirect:/products/" + product.getId();
+		redirectAttributes.addFlashAttribute("css", "success");
+		redirectAttributes.addFlashAttribute("msg", "Product is deleted!");
 
-        }
-    }
+		return "redirect:/products";
+	}
 
-    // show add product form
-    @RequestMapping(value = "/products/add", method = RequestMethod.GET)
-    public String showAddProductForm(Model model) {
-        Product product = new Product();
-        product.setName("");
-        product.setPrice(0.0);
-        model.addAttribute("productForm", product);
-        return "products/productform";
-    }
+	// show product details
+	@GetMapping(value = "/products/{id}")
+	public String showProduct(@PathVariable("id") int id, Model model) {
+		Product product = productService.findById(id);
+		if (product == null) {
+			model.addAttribute("css", "danger");
+			model.addAttribute("msg", "Product not found");
+		}
+		model.addAttribute("product", product);
+		return "products/show";
+	}
 
-    // show update form
-    @RequestMapping(value = "/products/{id}/update", method = RequestMethod.GET)
-    public String showUpdateProductForm(@PathVariable("id") int id, Model model) {
-        Product product = productService.getProduct(id);
-        model.addAttribute("productForm", product);
-        return "products/productform";
-    }
-
-    @RequestMapping(value = "/products/{id}/delete", method = RequestMethod.POST)
-    public String deleteProduct(@PathVariable("id") int id,
-                                final RedirectAttributes redirectAttributes) {
-        try {
-            productService.delete(id);
-        } catch (Exception e) {
-            return "exception";
-        }
-
-        redirectAttributes.addFlashAttribute("css", "success");
-        redirectAttributes.addFlashAttribute("msg", "Product is deleted!");
-
-        return "redirect:/products";
-    }
-
-    // show product details
-    @RequestMapping(value = "/products/{id}", method = RequestMethod.GET)
-    public String showProduct(@PathVariable("id") int id, Model model) {
-        Product product = productService.getProduct(id);
-        if (product == null) {
-            model.addAttribute("css", "danger");
-            model.addAttribute("msg", "Product not found");
-        }
-        model.addAttribute("product", product);
-        return "products/show";
-    }
-
-    @RequestMapping(value = "/discounts", method = RequestMethod.GET)
-    public String showAllDiscounts(Model model) {
-        model.addAttribute("discounts", discountService.getAllDiscounts());
-        return "discounts/discountlist";
-    }
+	@GetMapping(value = "/discounts")
+	public String showAllDiscounts(Model model) {
+		model.addAttribute("discounts", discountService.findAllOrdered());
+		return "discounts/discountlist";
+	}
 }

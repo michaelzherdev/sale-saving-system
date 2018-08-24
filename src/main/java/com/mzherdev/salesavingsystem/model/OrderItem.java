@@ -1,10 +1,19 @@
 package com.mzherdev.salesavingsystem.model;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "order_items")
@@ -22,7 +31,7 @@ public class OrderItem implements Serializable {
     private int quantity;
 
     @Column
-    private double sum;
+    private BigDecimal sum;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id")
@@ -49,11 +58,11 @@ public class OrderItem implements Serializable {
         this.quantity = quantity;
     }
 
-    public double getSum() {
-        return new BigDecimal(sum).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    public BigDecimal getSum() {
+        return sum.setScale(2, RoundingMode.HALF_UP);
     }
 
-    public void setSum(double sum) {
+    public void setSum(BigDecimal sum) {
         this.sum = sum;
     }
 
@@ -75,7 +84,7 @@ public class OrderItem implements Serializable {
 
     @Override
     public String toString() {
-        return product.getName() + new BigDecimal(product.getPrice()).setScale(2, RoundingMode.HALF_UP).doubleValue() + "$ * " + quantity;
+        return product.getName() + product.getPrice() + "$ * " + quantity;
     }
 
 

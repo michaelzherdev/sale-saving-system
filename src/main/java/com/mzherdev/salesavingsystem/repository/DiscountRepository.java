@@ -1,16 +1,19 @@
 package com.mzherdev.salesavingsystem.repository;
 
-import com.mzherdev.salesavingsystem.model.Discount;
-
+import java.time.LocalDateTime;
 import java.util.List;
 
-public interface DiscountRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
-    void add(Discount discount);
+import com.mzherdev.salesavingsystem.model.Discount;
 
-    void edit(Discount discount);
+@Repository
+public interface DiscountRepository extends JpaRepository<Discount, Integer>{
 
-    Discount getDiscount(int discountId);
-
-    List<Discount> getAllDiscounts();
+    @Query("SELECT d FROM Discount d ORDER BY d.timeEnd DESC")
+    List<Discount> findOrdered();
+    @Query(value = "SELECT * FROM discounts d WHERE ?1 BETWEEN d.time_start AND d.time_end ORDER BY RANDOM() LIMIT 1", nativeQuery = true)
+    Discount findActiveDiscount(LocalDateTime dateTime);
 }

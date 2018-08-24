@@ -2,7 +2,7 @@
 <div class="container">
 	<hr>
 	<footer>
-		<p>&copy; Mikhail Zherdev 2016</p>
+		<p>&copy; Mikhail Zherdev 2016-2018</p>
 	</footer>
 </div>
 

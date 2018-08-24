@@ -1,16 +1,10 @@
 package com.mzherdev.salesavingsystem.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 import com.mzherdev.salesavingsystem.model.OrderItem;
 
-import java.util.List;
-
-public interface OrderItemRepository {
-
-	void add(OrderItem orderItem);
-	
-	void edit(OrderItem orderItem);
-	
-	OrderItem getOrderItem(int orderItemId);
-	
-	List<OrderItem> getAllOrderItems();
+@Repository
+public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 }

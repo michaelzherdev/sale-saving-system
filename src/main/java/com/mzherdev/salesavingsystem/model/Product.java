@@ -1,19 +1,26 @@
 package com.mzherdev.salesavingsystem.model;
 
-import org.hibernate.annotations.*;
-import org.hibernate.annotations.Cache;
-import org.hibernate.validator.constraints.NotEmpty;
-
-import javax.persistence.*;
-import javax.persistence.Entity;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @Table(name = "products")
@@ -26,12 +33,12 @@ public class Product implements Serializable {
 	}
 
 	//for test mock
-	public Product(String name, double price) {
+	public Product(String name, BigDecimal price) {
 		this.name = name;
 		this.price = price;
 	}
 
-	public Product(int id, String name, double price) {
+	public Product(int id, String name, BigDecimal price) {
 		this(name, price);
 		this.id = id;
 	}
@@ -47,14 +54,14 @@ public class Product implements Serializable {
 
 	@Column
 	@NotNull
-	private double price;
+	private BigDecimal price;
 	
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "product")
 	@OrderBy("id DESC")
 	@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 	private Set<OrderItem> items = new HashSet<>();
 
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "product")
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 	private Set<Discount> discounts = new HashSet<>();
 
@@ -74,11 +81,11 @@ public class Product implements Serializable {
 		this.name = name.trim();
 	}
 
-	public double getPrice() {
-		return new BigDecimal(price).setScale(2, RoundingMode.HALF_UP).doubleValue();
+	public BigDecimal getPrice() {
+		return price;
 	}
 
-	public void setPrice(double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 	

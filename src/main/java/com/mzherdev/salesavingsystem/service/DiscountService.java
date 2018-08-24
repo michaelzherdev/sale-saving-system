@@ -1,16 +1,14 @@
 package com.mzherdev.salesavingsystem.service;
 
-import com.mzherdev.salesavingsystem.model.Discount;
-
+import java.time.LocalDateTime;
 import java.util.List;
+
+import com.mzherdev.salesavingsystem.model.Discount;
 
 public interface DiscountService {
 
-    void add(Discount discount);
+    void save(Discount discount);
 
-    void edit(Discount discount);
-
-    Discount getDiscount(int discountId);
-
-    List<Discount> getAllDiscounts();
+    List<Discount> findAllOrdered();
+    Discount findActiveDiscount(LocalDateTime dateTime);
 }

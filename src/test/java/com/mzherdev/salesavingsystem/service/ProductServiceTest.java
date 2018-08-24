@@ -1,15 +1,22 @@
 package com.mzherdev.salesavingsystem.service;
 
-import com.mzherdev.salesavingsystem.mock.ProductTestData;
-import com.mzherdev.salesavingsystem.model.Product;
-import org.hibernate.exception.ConstraintViolationException;
+import static com.mzherdev.salesavingsystem.mock.ProductTestData.ALL;
+import static com.mzherdev.salesavingsystem.mock.ProductTestData.JEANS_PRODUCT_ID;
+import static com.mzherdev.salesavingsystem.mock.ProductTestData.T_SHIRT_PRODUCT_ID;
+import static com.mzherdev.salesavingsystem.mock.ProductTestData.UNKNOWN_PRODUCT_ID;
+import static org.junit.Assert.assertEquals;
+
+import java.math.BigDecimal;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 
-import static com.mzherdev.salesavingsystem.mock.ProductTestData.*;
-import static org.junit.Assert.*;
+import com.mzherdev.salesavingsystem.mock.ProductTestData;
+import com.mzherdev.salesavingsystem.model.Product;
 
 public class ProductServiceTest extends BaseServiceTest {
 
@@ -19,7 +26,6 @@ public class ProductServiceTest extends BaseServiceTest {
     @Before
     public void setUp() {
         service.evictCache();
-        jpaUtils.clear2ndLevelHibernateCache();
     }
 
     @After
@@ -29,26 +35,26 @@ public class ProductServiceTest extends BaseServiceTest {
 
     @Test
     public void testAdd() throws Exception {
-        Product product = new Product("NewProduct", 100.0);
-        service.add(product);
+        Product product = new Product("NewProduct", BigDecimal.valueOf(100.0));
+        service.save(product);
         assertEquals(ALL.size() + 1, service.getAllProducts().size());
     }
 
-    @Test(expected = ConstraintViolationException.class)
+    @Test(expected = DataIntegrityViolationException.class)
     public void testAddDuplicateName() throws Exception {
-        service.add(new Product("Jeans", 9.5));
+        service.save(new Product("Jeans", BigDecimal.valueOf(9.5)));
     }
 
     @Test
     public void testEdit() throws Exception {
-        Product product = service.getProduct(JEANS_PRODUCT_ID);
+        Product product = service.findById(JEANS_PRODUCT_ID);
         product.setName("Jeans NEW");
-        product.setPrice(12.0);
-        service.edit(product);
+        product.setPrice(BigDecimal.valueOf(12.0));
+        service.save(product);
 
-        assertEquals(product.getId(), service.getProduct(JEANS_PRODUCT_ID).getId());
-        assertEquals(product.getName(), service.getProduct(JEANS_PRODUCT_ID).getName());
-        assertEquals(product.getPrice(), service.getProduct(JEANS_PRODUCT_ID).getPrice(), 0.01);
+        assertEquals(product.getId(), service.findById(JEANS_PRODUCT_ID).getId());
+        assertEquals(product.getName(), service.findById(JEANS_PRODUCT_ID).getName());
+        assertEquals(product.getPrice().doubleValue(), service.findById(JEANS_PRODUCT_ID).getPrice().doubleValue(), 0.01);
     }
 
     @Test
@@ -59,22 +65,22 @@ public class ProductServiceTest extends BaseServiceTest {
 
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = InvalidDataAccessApiUsageException.class)
     public void testNotFoundDelete() throws Exception {
         service.delete(UNKNOWN_PRODUCT_ID);
     }
 
     @Test
     public void testGet() throws Exception {
-        Product product = service.getProduct(JEANS_PRODUCT_ID);
+        Product product = service.findById(JEANS_PRODUCT_ID);
         assertEquals(ProductTestData.JEANS.getId(), product.getId());
         assertEquals(ProductTestData.JEANS.getName(), product.getName());
-        assertEquals(ProductTestData.JEANS.getPrice(), product.getPrice(), 0.01);
+        assertEquals(ProductTestData.JEANS.getPrice().doubleValue(), product.getPrice().doubleValue(), 0.01);
     }
 
     @Test
     public void testGetNotFound() throws Exception {
-        Product product = service.getProduct(UNKNOWN_PRODUCT_ID);
+        Product product = service.findById(UNKNOWN_PRODUCT_ID);
         assertEquals(null, product);
     }
 

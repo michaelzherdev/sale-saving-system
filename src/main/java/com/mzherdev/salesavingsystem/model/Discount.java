@@ -1,12 +1,22 @@
 package com.mzherdev.salesavingsystem.model;
 
-import com.mzherdev.salesavingsystem.tools.TimeUtils;
-import org.hibernate.validator.constraints.Range;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.Range;
+
+import com.mzherdev.salesavingsystem.tools.TimeUtils;
 
 @Entity
 @Table(name = "discounts")
@@ -31,7 +41,7 @@ public class Discount implements Serializable {
     @Range(min = 5, max = 10)
     private Integer amount;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "product_id")
     private Product product;
 

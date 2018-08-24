@@ -1,13 +1,12 @@
 package com.mzherdev.salesavingsystem.controller;
 
-import com.mzherdev.salesavingsystem.model.*;
-import com.mzherdev.salesavingsystem.service.DiscountService;
-import com.mzherdev.salesavingsystem.service.OrderItemService;
-import com.mzherdev.salesavingsystem.service.ProductService;
-import com.mzherdev.salesavingsystem.service.SaleService;
-import com.mzherdev.salesavingsystem.tools.ProductEditor;
-import com.mzherdev.salesavingsystem.tools.TimeUtils;
-import com.sun.org.apache.xpath.internal.operations.Or;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,17 +15,23 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.mzherdev.salesavingsystem.model.Discount;
+import com.mzherdev.salesavingsystem.model.OrderItem;
+import com.mzherdev.salesavingsystem.model.Product;
+import com.mzherdev.salesavingsystem.model.Sale;
+import com.mzherdev.salesavingsystem.service.DiscountService;
+import com.mzherdev.salesavingsystem.service.OrderItemService;
+import com.mzherdev.salesavingsystem.service.ProductService;
+import com.mzherdev.salesavingsystem.service.SaleService;
+import com.mzherdev.salesavingsystem.tools.ProductEditor;
 
 @Controller
 public class SaleController {
@@ -47,14 +52,14 @@ public class SaleController {
     @Autowired
     private DiscountService discountService;
 
-    @RequestMapping(value = "/sales", method = RequestMethod.GET)
+    @GetMapping(value = "/sales")
     public String showAllSales(Model model) {
         model.addAttribute("sales", saleService.getAllSales());
         return "sales/saleslist";
     }
 
     // save sale
-    @RequestMapping(value = "/sales", method = RequestMethod.POST)
+    @PostMapping(value = "/sales")
     public String saveSale(@ModelAttribute("saleForm") @Validated Sale sale,
                            BindingResult result, Model model,
                            final RedirectAttributes redirectAttributes) {
@@ -76,18 +81,15 @@ public class SaleController {
         redirectAttributes.addFlashAttribute("css", "success");
         redirectAttributes.addFlashAttribute("msg", "Sale Added Successfully!");
 
-        Optional<Discount> optionalDiscount = discountService.getAllDiscounts()
-                .stream()
-                .filter(d -> TimeUtils.isBetween(LocalDateTime.now(), d.getTimeStart(), d.getTimeEnd()))
-                .findAny();
+        Discount discount = discountService.findActiveDiscount(LocalDateTime.now());
 
-        double cost = orderItems.stream()
-                .mapToDouble(oi -> oi.getSum())
-                .sum();
+        BigDecimal cost = orderItems.stream()
+                .map(oi -> oi.getSum())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        double costWithDiscount = orderItems.stream()
-                .mapToDouble(oi -> countOrderItemCost(oi, optionalDiscount))
-                .sum();
+        BigDecimal costWithDiscount = orderItems.stream()
+                .map(oi -> countOrderItemCost(oi, discount))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         sale.setItems(orderItems);
         sale.setCost(cost);
@@ -95,12 +97,12 @@ public class SaleController {
         model.addAttribute("saleForm", sale);
         model.addAttribute("items", orderItems);
 
-        sale = saleService.add(sale);
+        sale = saleService.save(sale);
 
         if (sale.getItems() != null)
             for (OrderItem orderItem : sale.getItems()) {
                 orderItem.setSale(sale);
-                orderItemService.edit(orderItem);
+                orderItemService.save(orderItem);
             }
         orderItems.clear();
 
@@ -110,7 +112,7 @@ public class SaleController {
     }
 
     // show add sale form
-    @RequestMapping(value = "/sales/add", method = RequestMethod.GET)
+    @GetMapping(value = "/sales/add")
     public String showAddSaleForm(Model model) {
         Sale sale;
         if (orderItems.isEmpty()) {
@@ -120,18 +122,15 @@ public class SaleController {
             model.addAttribute("saleForm", sale);
             model.addAttribute("items", items);
         } else {
-            Optional<Discount> optionalDiscount = discountService.getAllDiscounts()
-                    .stream()
-                    .filter(d -> TimeUtils.isBetween(LocalDateTime.now(), d.getTimeStart(), d.getTimeEnd()))
-                    .findAny();
+            Discount discount = discountService.findActiveDiscount(LocalDateTime.now());
 
-            double cost = orderItems.stream()
-                    .mapToDouble(oi -> oi.getSum())
-                    .sum();
+            BigDecimal cost = orderItems.stream()
+                    .map(oi -> oi.getSum())
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            double costWithDiscount = orderItems.stream()
-                    .mapToDouble(oi -> countOrderItemCost(oi, optionalDiscount))
-                    .sum();
+            BigDecimal costWithDiscount = orderItems.stream()
+                    .map(oi -> countOrderItemCost(oi, discount))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
 
             sale = new Sale();
             sale.setItems(orderItems);
@@ -144,7 +143,7 @@ public class SaleController {
     }
 
     // show add order item form
-    @RequestMapping(value = "/sales/addOrderItem", method = RequestMethod.GET)
+    @GetMapping(value = "/sales/addOrderItem")
     public String showAddOrderItemForm(Model model) {
 
         OrderItem orderItem = new OrderItem();
@@ -163,10 +162,10 @@ public class SaleController {
     }
 
     // show sale
-    @RequestMapping(value = "/sales/{id}", method = RequestMethod.GET)
+    @GetMapping(value = "/sales/{id}")
     public String showSale(@PathVariable("id") int id, Model model) {
 
-        Sale sale = saleService.getSale(id);
+        Sale sale = saleService.findById(id);
         if (sale == null) {
             model.addAttribute("css", "danger");
             model.addAttribute("msg", "Sale not found");
@@ -178,7 +177,7 @@ public class SaleController {
 
 
     // save order item
-    @RequestMapping(value = "/sales/addOrderItem", method = RequestMethod.POST)
+    @PostMapping(value = "/sales/addOrderItem")
     public String saveOrderItem(
             @ModelAttribute("orderItemForm") @Validated OrderItem orderItem,
             BindingResult result, Model model,
@@ -190,9 +189,9 @@ public class SaleController {
         } else {
             redirectAttributes.addFlashAttribute("css", "success");
             redirectAttributes.addFlashAttribute("msg", "Order Item Added Successfully!");
-            double sum = orderItem.getProduct().getPrice() * orderItem.getQuantity();
+            BigDecimal sum = orderItem.getProduct().getPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity()));
             orderItem.setSum(sum);
-            orderItemService.add(orderItem);
+            orderItemService.save(orderItem);
             orderItems.add(orderItem);
             return "redirect:/sales/add";
         }
@@ -221,12 +220,11 @@ public class SaleController {
         model.addAttribute("productMap", productMap);
     }
 
-    private double countOrderItemCost(OrderItem oi, Optional<Discount> optionalDiscount) {
-        double orderItemCost = oi.getSum();
-        if(optionalDiscount.isPresent()) {
-            Discount discount = optionalDiscount.get();
+    private BigDecimal countOrderItemCost(OrderItem oi, Discount discount) {
+        BigDecimal orderItemCost = oi.getSum();
+        if(discount != null) {
             if (oi.getProduct().getId() == discount.getProduct().getId())
-                orderItemCost = orderItemCost * (1 - discount.getAmount() / 100.0);
+                orderItemCost = orderItemCost.multiply(BigDecimal.valueOf(1 - discount.getAmount() / 100.0));
         }
         return orderItemCost;
     }

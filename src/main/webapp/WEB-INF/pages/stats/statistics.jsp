@@ -28,7 +28,7 @@
 
 <div class="container">
 
-    <h1>Statistics for ${today}</h1>
+    <h1>Statistics for today</h1>
 
     <table class="table table-striped">
         <thead>

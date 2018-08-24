@@ -1,15 +1,18 @@
 package com.mzherdev.salesavingsystem.service;
 
-import com.mzherdev.salesavingsystem.repository.ProductRepository;
-import com.mzherdev.salesavingsystem.model.Product;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.mzherdev.salesavingsystem.model.Product;
+import com.mzherdev.salesavingsystem.repository.ProductRepository;
 
-@Service
+@Service("productService")
+@Transactional
 public class ProductServiceImpl implements ProductService {
 	
 	@Autowired
@@ -17,31 +20,30 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	@CacheEvict(value = "products", allEntries = true)
-	public void add(Product product) {
-		productRepository.add(product);
-	}
-
-	@Override
-	@CacheEvict(value = "products", allEntries = true)
-	public void edit(Product product) {
-		productRepository.edit(product);
+	public void save(Product product) {
+		productRepository.save(product);
 	}
 
 	@Override
 	@CacheEvict(value = "products", allEntries = true)
 	public void delete(int productId) {
-		productRepository.delete(productId);
+		productRepository.delete(findById(productId));
 	}
 
 	@Override
-	public Product getProduct(int productId) {
-		return productRepository.getProduct(productId);
+	public Product findById(int productId) {
+		return productRepository.findById(productId).orElse(null);
 	}
 
 	@Override
 	@Cacheable("products")
 	public List<Product> getAllProducts() {
-		return productRepository.getAllProducts();
+		return productRepository.findAll();
+	}
+
+	@Override
+	public Product findRandom() {
+		return productRepository.findRandom();
 	}
 
 	@Override

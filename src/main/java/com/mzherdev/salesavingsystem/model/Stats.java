@@ -1,7 +1,6 @@
 package com.mzherdev.salesavingsystem.model;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 public class Stats {
 
@@ -9,20 +8,20 @@ public class Stats {
 
     private int salesCount;
 
-    private double costCommon;
+    private BigDecimal costCommon;
 
-    private double costAverage;
+    private BigDecimal costAverage;
 
-    private double discountSum;
+    private BigDecimal discountSum;
 
-    private double costCommonWithDiscounts;
+    private BigDecimal costCommonWithDiscounts;
 
-    private double costAverageWithDiscounts;
+    private BigDecimal costAverageWithDiscounts;
 
     public Stats() {
     }
 
-    public Stats(String period, int salesCount, double costCommon, double costAverage, double discountSum, double costCommonWithDiscounts, double costAverageWithDiscounts) {
+    public Stats(String period, int salesCount, BigDecimal costCommon, BigDecimal costAverage, BigDecimal discountSum, BigDecimal costCommonWithDiscounts, BigDecimal costAverageWithDiscounts) {
         this.period = period;
         this.salesCount = salesCount;
         this.costCommon = costCommon;
@@ -48,43 +47,43 @@ public class Stats {
         this.salesCount = salesCount;
     }
 
-    public double getCostCommon() {
+    public BigDecimal getCostCommon() {
         return costCommon;
     }
 
-    public void setCostCommon(double costCommon) {
+    public void setCostCommon(BigDecimal costCommon) {
         this.costCommon = costCommon;
     }
 
-    public double getCostAverage() {
+    public BigDecimal getCostAverage() {
         return costAverage;
     }
 
-    public void setCostAverage(double costAverage) {
+    public void setCostAverage(BigDecimal costAverage) {
         this.costAverage = costAverage;
     }
 
-    public double getDiscountSum() {
-        return new BigDecimal(discountSum).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    public BigDecimal getDiscountSum() {
+        return discountSum;
     }
 
-    public void setDiscountSum(double discountSum) {
+    public void setDiscountSum(BigDecimal discountSum) {
         this.discountSum = discountSum;
     }
 
-    public double getCostCommonWithDiscounts() {
+    public BigDecimal getCostCommonWithDiscounts() {
         return costCommonWithDiscounts;
     }
 
-    public void setCostCommonWithDiscounts(double costCommonWithDiscounts) {
+    public void setCostCommonWithDiscounts(BigDecimal costCommonWithDiscounts) {
         this.costCommonWithDiscounts = costCommonWithDiscounts;
     }
 
-    public double getCostAverageWithDiscounts() {
+    public BigDecimal getCostAverageWithDiscounts() {
         return costAverageWithDiscounts;
     }
 
-    public void setCostAverageWithDiscounts(double costAverageWithDiscounts) {
+    public void setCostAverageWithDiscounts(BigDecimal costAverageWithDiscounts) {
         this.costAverageWithDiscounts = costAverageWithDiscounts;
     }
 }

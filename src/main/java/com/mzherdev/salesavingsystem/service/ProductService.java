@@ -1,20 +1,20 @@
 package com.mzherdev.salesavingsystem.service;
 
-import com.mzherdev.salesavingsystem.model.Product;
-
 import java.util.List;
+
+import com.mzherdev.salesavingsystem.model.Product;
 
 public interface ProductService {
 
-	void add(Product product);
-
-	void edit(Product product);
+	void save(Product product);
 
 	void delete(int productId);
 
-	Product getProduct(int productId);
+	Product findById(int productId);
 
 	List<Product> getAllProducts();
+
+	Product findRandom();
 
 	void evictCache();
 }
