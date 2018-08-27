@@ -1,18 +1,21 @@
 package com.mzherdev.salesavingsystem.controller;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.mzherdev.salesavingsystem.model.Discount;
@@ -22,6 +25,8 @@ import com.mzherdev.salesavingsystem.service.ProductService;
 
 @Controller
 public class ProductController {
+
+	private static final int PAGE_SIZE = 5;
 
 	@Autowired
 	private ProductService productService;
@@ -35,82 +40,52 @@ public class ProductController {
 	}
 
 	@GetMapping(value = "/products")
-	public String showAllProducts(Model model) {
-		List<Product> products = productService.getAllProducts();
+	public String showProducts(Model model, @RequestParam(defaultValue = "1") int page) {
+		Page<Product> products = productService.findAll(PageRequest.of(page - 1, PAGE_SIZE, Sort.Direction.ASC, "id"));
 		Discount discount = discountService.findActiveDiscount(LocalDateTime.now());
 		model.addAttribute("discount", discount != null ? discount : new Discount());
 		model.addAttribute("products", products);
-		return "products/list";
+		model.addAttribute("currentPage", page);
+		return "products";
+	}
+
+	@ResponseBody
+	@GetMapping(value = "/products/{id}")
+	public Product findOne(@PathVariable("id") int id) {
+		return productService.findById(id);
 	}
 
 	@PostMapping(value = "/products")
-	public String editProduct(
-			@ModelAttribute("productForm") @Validated Product product,
-			BindingResult result, Model model,
+	public String saveProduct(@Validated Product product,
+			BindingResult result,
 			final RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
-			return "products/productform";
+			System.out.println(result.getAllErrors());
+			//todo show error
+//			redirectAttributes.addFlashAttribute("msg",
+//					product.isNew() ? "Product Added Successfully!" : "Product Updated Successfully!");
+			return "redirect:/products";
 		} else {
-
-			// Add message to flash scope
-			redirectAttributes.addFlashAttribute("css", "success");
-			redirectAttributes.addFlashAttribute("msg",
-					product.isNew() ? "Product Added Successfully!" : "Product Updated Successfully!");
 			productService.save(product);
-			return "redirect:/products/" + product.getId();
+			return "redirect:/products";
 
 		}
 	}
 
-	// show add product form
-	@GetMapping(value = "/products/add")
-	public String showAddProductForm(Model model) {
-		Product product = new Product();
-		product.setName("");
-		product.setPrice(BigDecimal.ZERO);
-		model.addAttribute("productForm", product);
-		return "products/productform";
-	}
-
-	// show update form
-	@GetMapping(value = "/products/{id}/update")
-	public String showUpdateProductForm(@PathVariable("id") int id, Model model) {
-		Product product = productService.findById(id);
-		model.addAttribute("productForm", product);
-		return "products/productform";
-	}
-
-	@PostMapping(value = "/products/{id}/delete")
-	public String deleteProduct(@PathVariable("id") int id,
-								final RedirectAttributes redirectAttributes) {
+	@GetMapping(value = "/products/delete/{id}")
+	public String delete(@PathVariable("id") Integer id) {
 		try {
 			productService.delete(id);
 		} catch (Exception e) {
 			return "exception";
 		}
-
-		redirectAttributes.addFlashAttribute("css", "success");
-		redirectAttributes.addFlashAttribute("msg", "Product is deleted!");
-
 		return "redirect:/products";
 	}
 
-	// show product details
-	@GetMapping(value = "/products/{id}")
-	public String showProduct(@PathVariable("id") int id, Model model) {
-		Product product = productService.findById(id);
-		if (product == null) {
-			model.addAttribute("css", "danger");
-			model.addAttribute("msg", "Product not found");
-		}
-		model.addAttribute("product", product);
-		return "products/show";
-	}
-
 	@GetMapping(value = "/discounts")
-	public String showAllDiscounts(Model model) {
-		model.addAttribute("discounts", discountService.findAllOrdered());
-		return "discounts/discountlist";
+	public String showDiscounts(Model model, @RequestParam(defaultValue = "1") int page) {
+		model.addAttribute("discounts", discountService.findAll(PageRequest.of(page - 1, PAGE_SIZE, Sort.Direction.DESC, "id")));
+		return "/discounts";
 	}
 }

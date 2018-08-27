@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.mzherdev.salesavingsystem.model.Discount;
-import com.mzherdev.salesavingsystem.model.Product;
 import com.mzherdev.salesavingsystem.service.DiscountService;
 import com.mzherdev.salesavingsystem.service.ProductService;
 
@@ -37,10 +36,12 @@ public class SchedulerTask {
 
         if (currentDiscount == null) {
             int amount = ThreadLocalRandom.current().nextInt(MIN_DISCOUNT_AMOUNT, MAX_DISCOUNT_AMOUNT + 1);
-            Product product = productService.findRandom();
             LocalDateTime endDate = now.plusHours(1).minusMinutes(1);
-            Discount discount = new Discount(now, endDate, amount, product);
-            discountService.save(discount);
+            Discount discount = new Discount();
+            discount.setAmount(amount);
+            discount.setTimeStart(now);
+            discount.setTimeEnd(endDate);
+            discountService.saveForRandomProduct(discount);
         }
         log.info("SchedulerTask finished");
     }

@@ -37,7 +37,7 @@ public class ProductServiceTest extends BaseServiceTest {
     public void testAdd() throws Exception {
         Product product = new Product("NewProduct", BigDecimal.valueOf(100.0));
         service.save(product);
-        assertEquals(ALL.size() + 1, service.getAllProducts().size());
+        assertEquals(ALL.size() + 1, service.findAll().size());
     }
 
     @Test(expected = DataIntegrityViolationException.class)
@@ -59,9 +59,9 @@ public class ProductServiceTest extends BaseServiceTest {
 
     @Test
     public void testDelete() throws Exception {
-        assertEquals(ALL.size(), service.getAllProducts().size());
+        assertEquals(ALL.size(), service.findAll().size());
         service.delete(T_SHIRT_PRODUCT_ID);
-        assertEquals(ALL.size() - 1, service.getAllProducts().size());
+        assertEquals(ALL.size() - 1, service.findAll().size());
 
     }
 
@@ -86,7 +86,7 @@ public class ProductServiceTest extends BaseServiceTest {
 
     @Test
     public void testGetAll() throws Exception {
-        assertEquals(ALL.size(), service.getAllProducts().size());
+        assertEquals(ALL.size(), service.findAll().size());
     }
 
 }

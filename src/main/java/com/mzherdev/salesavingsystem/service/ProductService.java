@@ -2,6 +2,9 @@ package com.mzherdev.salesavingsystem.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.mzherdev.salesavingsystem.model.Product;
 
 public interface ProductService {
@@ -12,7 +15,9 @@ public interface ProductService {
 
 	Product findById(int productId);
 
-	List<Product> getAllProducts();
+	List<Product> findAll();
+
+	Page<Product> findAll(Pageable pageable);
 
 	Product findRandom();
 

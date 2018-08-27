@@ -151,7 +151,7 @@ public class SaleController {
         orderItem.setQuantity(1);
 
         model.addAttribute("sale", new Sale());
-        model.addAttribute("products", productService.getAllProducts());
+        model.addAttribute("products", productService.findAll());
         model.addAttribute("product", new Product());
         model.addAttribute("orderItemForm", orderItem);
 
@@ -214,7 +214,7 @@ public class SaleController {
             numbersList.add(i);
         model.addAttribute("numberList", numbersList);
 
-        Map<Integer, String> productMap = productService.getAllProducts()
+        Map<Integer, String> productMap = productService.findAll()
                 .stream()
                 .collect(Collectors.toMap(Product::getId, Product::getName));
         model.addAttribute("productMap", productMap);

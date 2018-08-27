@@ -1,5 +1,7 @@
 package com.mzherdev.salesavingsystem.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -35,10 +37,12 @@ public class OrderItem implements Serializable {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id")
+    @JsonBackReference
     private Product product;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "sale_id")
+    @JsonBackReference
     private Sale sale;
 
 
