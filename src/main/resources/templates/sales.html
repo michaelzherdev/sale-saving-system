@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link th:href="@{/webjars/bootstrap/4.0.0/css/bootstrap.min.css}" rel="stylesheet"/>
+    <script th:src="@{/webjars/jquery/3.3.0/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/4.0.0/js/bootstrap.min.js}"></script>
+    <title>Sales</title>
+</head>
+
+<nav class="navbar navbar-default ">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/products">Products</a>
+            <a class="navbar-brand" href="/discounts">Discounts</a>
+            <a class="navbar-brand" href="/statistics">Statistics for today</a>
+        </div>
+    </div>
+</nav>
+
+<body>
+<div class="container">
+    <div class="row">
+        <h1>Sales</h1>
+    </div>
+    <a href="/saleform" class="btn btn-success newBtn">Add sale</a>
+    <!--<button class="btn btn-success newBtn" data-toggle="modal" data-target="#newModal">Add sale</button>-->
+    <hr/>
+    <div class="row">
+        <table class="table">
+            <tr>
+                <th>ID</th>
+                <th>Check sum, $</th>
+                <th>Date</th>
+            </tr>
+            <tr th:each="sale : ${sales.content}">
+                <td><a th:href="@{'/sales/' + ${sale.id}}" th:text="${sale.id}" class="showBtn"></a></td>
+                <td th:text="${sale.costWithDiscount}"></td>
+                <td th:text="${sale.localDateTimeAsString}"></td>
+            </tr>
+        </table>
+        <hr/>
+        <ul class="nav nav-pills">
+            <li class="nav-item" th:each="i : ${#numbers.sequence(1,sales.totalPages)}">
+                <a th:href="@{'/sales'(page=${i})}" th:text="${i}" class="nav-link"
+                   th:classappend="${currentPage}==${i}?'active':''"/>
+            </li>
+        </ul>
+    </div>
+
+    <div class="modal fade" id="showModal" tabindex="-1" role="dialog" aria-labelledby="showModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="showModalLabel">Product Info</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="id" class="col-form-label">ID:</label>
+                        <input type="number" class="form-control" id="id" name="id" value="" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="cost" class="col-form-label">Cost:</label>
+                        <input type="text" class="form-control" id="cost" name="cost" value="" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="date" class="col-form-label">Date:</label>
+                        <input type="text" class="form-control" id="date" name="date" value="" disabled>
+                    </div>
+                    <div class="form-group">
+                        <table id="showProductTable" class="table">
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Sum</th>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+		$(document).ready(function () {
+			$('.showBtn').on('click', function (event) {
+				event.preventDefault();
+				var href = $(this).attr('href');
+				$.get(href, function (sale, status) {
+					$('#showModal #id').val(sale.id);
+					$('#showModal #cost').val(sale.costWithDiscount);
+					$('#showModal #date').val(sale.localDateTimeAsString);
+
+					$('#showProductTable').find('tr:gt(0)').remove();
+					if (sale.items.length == 0) {
+						$('#showProductTable').hide();
+					} else {
+						$('#showProductTable').show();
+						sale.items.forEach(function (item) {
+							$('#showProductTable tr:last')
+								.after('<tr><td>' + item.product.name + '</td><td>' + item.quantity + '</td><td>' + item.sum + '</td></tr>');
+						})
+					}
+				})
+				$('#showModal').modal();
+			})
+		})
+    </script>
+</div>
+</body>
+</html>

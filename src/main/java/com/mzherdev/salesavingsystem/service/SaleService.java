@@ -3,8 +3,10 @@ package com.mzherdev.salesavingsystem.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.mzherdev.salesavingsystem.model.Sale;
-import com.mzherdev.salesavingsystem.model.Stats;
 
 public interface SaleService {
 	
@@ -19,4 +21,6 @@ public interface SaleService {
 	List<Sale> getAllSales();
 
 	void evictCache();
+
+	Page<Sale> findAll(Pageable pageable);
 }

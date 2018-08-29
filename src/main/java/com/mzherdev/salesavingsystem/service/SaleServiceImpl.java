@@ -6,10 +6,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mzherdev.salesavingsystem.model.Sale;
+import com.mzherdev.salesavingsystem.repository.OrderItemRepository;
 import com.mzherdev.salesavingsystem.repository.SaleRepository;
 
 @Service("saleService")
@@ -19,10 +22,16 @@ public class SaleServiceImpl implements SaleService{
 	@Autowired
 	private SaleRepository saleRepository;
 
+	@Autowired
+	private OrderItemRepository itemRepository;
+
 	@Override
 	@CacheEvict(value = "sales", allEntries = true)
 	public Sale save(Sale sale) {
-		return saleRepository.save(sale);
+		Sale savedSale = saleRepository.save(sale);
+		sale.getItems().forEach( oi -> oi.setSale(savedSale));
+		itemRepository.saveAll(sale.getItems());
+		return savedSale;
 	}
 
 	@Override
@@ -51,4 +60,10 @@ public class SaleServiceImpl implements SaleService{
 	@Override
 	@CacheEvict(value = "sales", allEntries = true)
 	public void evictCache() {}
+
+	@Override
+	@Cacheable("sales")
+	public Page<Sale> findAll(Pageable pageable) {
+		return saleRepository.findAll(pageable);
+	}
 }

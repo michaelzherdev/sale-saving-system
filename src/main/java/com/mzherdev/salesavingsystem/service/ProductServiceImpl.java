@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,11 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	@CacheEvict(value = "products", allEntries = true)
 	public void delete(int productId) {
-		productRepository.delete(findById(productId));
+		Product p = findById(productId);
+		if(p != null && !p.getItems().isEmpty()) {
+			throw new IllegalArgumentException("You cannot delete this product as you have sale(s) containing this product.");
+		}
+		productRepository.delete(p);
 	}
 
 	@Override

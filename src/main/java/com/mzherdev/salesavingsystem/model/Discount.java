@@ -1,6 +1,7 @@
 package com.mzherdev.salesavingsystem.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import javax.persistence.CascadeType;
@@ -95,5 +96,24 @@ public class Discount implements Serializable {
 
 	public String getEndTimeAsString() {
 		return TimeUtils.toString(timeEnd);
+	}
+
+	public BigDecimal getAmountInPercent() {
+		return BigDecimal.valueOf(1 - amount / 100.0);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		Discount discount = (Discount) o;
+
+		return id == discount.id;
+	}
+
+	@Override
+	public int hashCode() {
+		return id;
 	}
 }

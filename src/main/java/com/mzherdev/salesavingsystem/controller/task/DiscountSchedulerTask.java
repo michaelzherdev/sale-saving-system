@@ -14,15 +14,11 @@ import org.springframework.stereotype.Component;
 
 import com.mzherdev.salesavingsystem.model.Discount;
 import com.mzherdev.salesavingsystem.service.DiscountService;
-import com.mzherdev.salesavingsystem.service.ProductService;
 
 @Component
-public class SchedulerTask {
+public class DiscountSchedulerTask {
 
-    private static final Logger log = LoggerFactory.getLogger(SchedulerTask.class);
-
-    @Autowired
-    private ProductService productService;
+    private static final Logger log = LoggerFactory.getLogger(DiscountSchedulerTask.class);
 
     @Autowired
     private DiscountService discountService;

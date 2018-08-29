@@ -1,7 +1,6 @@
 package com.mzherdev.salesavingsystem.controller;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.mzherdev.salesavingsystem.model.Discount;
 import com.mzherdev.salesavingsystem.model.Product;
@@ -57,14 +55,10 @@ public class ProductController {
 
 	@PostMapping(value = "/products")
 	public String saveProduct(@Validated Product product,
-			BindingResult result,
-			final RedirectAttributes redirectAttributes) {
+							  BindingResult result) {
 
 		if (result.hasErrors()) {
 			System.out.println(result.getAllErrors());
-			//todo show error
-//			redirectAttributes.addFlashAttribute("msg",
-//					product.isNew() ? "Product Added Successfully!" : "Product Updated Successfully!");
 			return "redirect:/products";
 		} else {
 			productService.save(product);
@@ -75,17 +69,7 @@ public class ProductController {
 
 	@GetMapping(value = "/products/delete/{id}")
 	public String delete(@PathVariable("id") Integer id) {
-		try {
-			productService.delete(id);
-		} catch (Exception e) {
-			return "exception";
-		}
+		productService.delete(id);
 		return "redirect:/products";
-	}
-
-	@GetMapping(value = "/discounts")
-	public String showDiscounts(Model model, @RequestParam(defaultValue = "1") int page) {
-		model.addAttribute("discounts", discountService.findAll(PageRequest.of(page - 1, PAGE_SIZE, Sort.Direction.DESC, "id")));
-		return "/discounts";
 	}
 }

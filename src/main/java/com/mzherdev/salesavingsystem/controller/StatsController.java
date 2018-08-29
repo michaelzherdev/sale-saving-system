@@ -16,6 +16,6 @@ public class StatsController {
     @GetMapping(value = "/statistics")
     public String showStatistics(Model model) {
         model.addAttribute("stats", statisticsService.getStatisticsForCurrentDay());
-        return "stats/statistics";
+        return "statistics";
     }
 }
