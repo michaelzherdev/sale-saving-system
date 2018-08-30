@@ -38,7 +38,10 @@ public class DiscountSchedulerTask {
             discount.setTimeStart(now);
             discount.setTimeEnd(endDate);
             discountService.saveForRandomProduct(discount);
+            log.info("There is new discount for {} from {} to {}", discount.getProduct().getName(),
+                    discount.getStartTimeAsString(), discount.getEndTimeAsString());
         }
+
         log.info("SchedulerTask finished");
     }
 }

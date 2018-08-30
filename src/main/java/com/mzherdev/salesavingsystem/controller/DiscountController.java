@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.mzherdev.salesavingsystem.service.DiscountService;
 
 @Controller
-public class DiscountController {
-
-	private static final int PAGE_SIZE = 5;
+public class DiscountController extends BasePageController {
 
 	@Autowired
 	DiscountService discountService;

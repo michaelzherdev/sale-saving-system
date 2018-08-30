@@ -2,6 +2,7 @@ package com.mzherdev.salesavingsystem.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -11,14 +12,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.mzherdev.salesavingsystem.model.OrderItem;
 import com.mzherdev.salesavingsystem.model.Sale;
 import com.mzherdev.salesavingsystem.repository.OrderItemRepository;
 import com.mzherdev.salesavingsystem.repository.SaleRepository;
 
 @Service("saleService")
 @Transactional
-public class SaleServiceImpl implements SaleService{
-	
+public class SaleServiceImpl implements SaleService {
+
 	@Autowired
 	private SaleRepository saleRepository;
 
@@ -28,16 +30,16 @@ public class SaleServiceImpl implements SaleService{
 	@Override
 	@CacheEvict(value = "sales", allEntries = true)
 	public Sale save(Sale sale) {
-		Sale savedSale = saleRepository.save(sale);
-		sale.getItems().forEach( oi -> oi.setSale(savedSale));
-		itemRepository.saveAll(sale.getItems());
-		return savedSale;
+		saleRepository.save(sale);
+		List<OrderItem> items = new CopyOnWriteArrayList<>(sale.getItems());
+		items.forEach( oi -> oi.setSale(sale));
+		itemRepository.saveAll(items);
+		return sale;
 	}
 
 	@Override
 	@CacheEvict(value = "sales", allEntries = true)
 	public void delete(int saleId) {
-
 		saleRepository.delete(findById(saleId));
 	}
 
@@ -59,7 +61,8 @@ public class SaleServiceImpl implements SaleService{
 
 	@Override
 	@CacheEvict(value = "sales", allEntries = true)
-	public void evictCache() {}
+	public void evictCache() {
+	}
 
 	@Override
 	@Cacheable("sales")

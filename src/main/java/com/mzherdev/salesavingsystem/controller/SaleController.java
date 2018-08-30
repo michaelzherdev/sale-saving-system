@@ -1,5 +1,7 @@
 package com.mzherdev.salesavingsystem.controller;
 
+import static com.mzherdev.salesavingsystem.tools.AppExceptionHandler.convertToString;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,7 +16,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -32,9 +33,7 @@ import com.mzherdev.salesavingsystem.service.ProductService;
 import com.mzherdev.salesavingsystem.service.SaleService;
 
 @Controller
-public class SaleController {
-
-	private static final int PAGE_SIZE = 5;
+public class SaleController extends BasePageController {
 
 	private final Logger log = LoggerFactory.getLogger(SaleController.class.getSimpleName());
 
@@ -43,13 +42,11 @@ public class SaleController {
 	private BigDecimal costWithDiscount = BigDecimal.ZERO;
 
 	@Autowired
+	private DiscountService discountService;
+	@Autowired
 	private ProductService productService;
-
 	@Autowired
 	private SaleService saleService;
-
-	@Autowired
-	private DiscountService discountService;
 
 	@GetMapping(value = "/sales")
 	public String showSales(Model model, @RequestParam(defaultValue = "1") int page) {
@@ -59,7 +56,6 @@ public class SaleController {
 		return "sales";
 	}
 
-
 	@GetMapping(value = "/saleform")
 	public String showSaleForm(Model model) {
 		OrderItemForm itemForm = new OrderItemForm();
@@ -67,14 +63,9 @@ public class SaleController {
 		model.addAttribute("cost", cost);
 		model.addAttribute("costWithDiscount", costWithDiscount);
 		model.addAttribute("items", orderItems);
+		model.addAttribute("disabled", orderItems.isEmpty());
 		model.addAttribute("products", productService.findAll());
 		return "saleform";
-	}
-
-	private void clearSaleForm() {
-		cost = BigDecimal.ZERO;
-		costWithDiscount = BigDecimal.ZERO;
-		orderItems.clear();
 	}
 
 	@PostMapping(value = "/items")
@@ -90,7 +81,8 @@ public class SaleController {
 			Discount activeDiscount = discountService.findActiveDiscount(LocalDateTime.now());
 			if (orderItem.isDiscountAvailable(activeDiscount)) {
 				costWithDiscount = costWithDiscount.add(
-						orderItem.getSum().multiply(activeDiscount.getAmountInPercent()));
+						orderItem.getSum().multiply(activeDiscount.getAmountInPercent()))
+						.setScale(2, BigDecimal.ROUND_DOWN);
 			} else {
 				costWithDiscount = costWithDiscount.add(orderItem.getSum());
 			}
@@ -117,8 +109,10 @@ public class SaleController {
 		return "redirect:/sales";
 	}
 
-	private String convertToString(List<ObjectError> list) {
-		return list.stream().map(ObjectError::toString).reduce("", String::concat);
+	private void clearSaleForm() {
+		cost = BigDecimal.ZERO;
+		costWithDiscount = BigDecimal.ZERO;
+		orderItems.clear();
 	}
 
 	@ResponseBody
@@ -129,7 +123,6 @@ public class SaleController {
 
 	public static class OrderItemForm {
 		private Product product;
-		private Integer quantity;
 
 		public Product getProduct() {
 			return product;
@@ -137,14 +130,6 @@ public class SaleController {
 
 		public void setProduct(Product product) {
 			this.product = product;
-		}
-
-		public Integer getQuantity() {
-			return quantity;
-		}
-
-		public void setQuantity(Integer quantity) {
-			this.quantity = quantity;
 		}
 	}
 }

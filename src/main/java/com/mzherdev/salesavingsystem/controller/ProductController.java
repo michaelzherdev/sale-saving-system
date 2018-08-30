@@ -1,7 +1,11 @@
 package com.mzherdev.salesavingsystem.controller;
 
+import static com.mzherdev.salesavingsystem.tools.AppExceptionHandler.convertToString;
+
 import java.time.LocalDateTime;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,9 +26,9 @@ import com.mzherdev.salesavingsystem.service.DiscountService;
 import com.mzherdev.salesavingsystem.service.ProductService;
 
 @Controller
-public class ProductController {
+public class ProductController extends BasePageController {
 
-	private static final int PAGE_SIZE = 5;
+	private final Logger log = LoggerFactory.getLogger(ProductController.class.getSimpleName());
 
 	@Autowired
 	private ProductService productService;
@@ -56,14 +60,12 @@ public class ProductController {
 	@PostMapping(value = "/products")
 	public String saveProduct(@Validated Product product,
 							  BindingResult result) {
-
 		if (result.hasErrors()) {
-			System.out.println(result.getAllErrors());
+			log.error(convertToString(result.getAllErrors()));
 			return "redirect:/products";
 		} else {
 			productService.save(product);
 			return "redirect:/products";
-
 		}
 	}
 
