@@ -1,5 +1,7 @@
 DELETE FROM products;
 DELETE FROM sales;
+DELETE FROM order_items;
+DELETE FROM discounts;
 
 INSERT INTO products (name, price)
 VALUES ('Jeans', 9.50),
