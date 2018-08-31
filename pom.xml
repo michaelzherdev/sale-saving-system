@@ -83,12 +83,13 @@
             <version>3.3.0</version>
         </dependency>
 
-        <!--Postgres-->
+        <!--H2-->
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${postgres.version}</version>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.197</version>
         </dependency>
+
 
         <!--Cache-->
         <dependency>

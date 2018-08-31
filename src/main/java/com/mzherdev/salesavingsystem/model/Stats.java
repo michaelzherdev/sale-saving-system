@@ -22,22 +22,12 @@ public class Stats {
     public Stats() {
     }
 
-    public Stats(String period, int salesCount, BigDecimal costCommon, BigDecimal costAverage, BigDecimal discountSum, BigDecimal costCommonWithDiscounts, BigDecimal costAverageWithDiscounts) {
-        this.period = period;
-        this.salesCount = salesCount;
-        this.costCommon = costCommon;
-        this.costAverage = costAverage;
-        this.discountSum = discountSum;
-        this.costCommonWithDiscounts = costCommonWithDiscounts;
-        this.costAverageWithDiscounts = costAverageWithDiscounts;
-    }
-
     public String getPeriod() {
         return period;
     }
 
     public void setPeriod(String period) {
-        this.period = period;
+        this.period = setH2Period(period);
     }
 
     public int getSalesCount() {
@@ -86,5 +76,16 @@ public class Stats {
 
     public void setCostAverageWithDiscounts(BigDecimal costAverageWithDiscounts) {
         this.costAverageWithDiscounts = costAverageWithDiscounts;
+    }
+
+    private String setH2Period(String per) {
+        String res = per;
+        if(per.length() == 2) {
+            try {
+                int endHour = Integer.parseInt(per) + 1;
+                res += ":00 - " + endHour +":00";
+            } catch (NumberFormatException e) { }
+        }
+        return res;
     }
 }

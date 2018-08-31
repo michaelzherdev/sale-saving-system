@@ -1,17 +1,22 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/salesystem
-    username: postgres
-    password: postgres
+    url: jdbc:h2:mem:salesystem
+    username: sa
+    password: sa
+    initialization-mode: always
+  h2:
+    console:
+      enabled: true
+      path: /h2_console
   jpa:
-    show-sql: false
+    show-sql: true
     properties:
      hibernate:
       jdbc:
        lob:
         non_contextual_creation: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
       cashe:
         use_second_level_cache: true
         use_query_cache: false
@@ -21,3 +26,4 @@ spring:
       fail-on-empty-beans: false
 server:
   port: 8050
+

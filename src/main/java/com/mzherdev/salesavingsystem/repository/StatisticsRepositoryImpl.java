@@ -17,13 +17,13 @@ public class StatisticsRepositoryImpl implements StatisticsRepository {
 
 	@Override
 	public List<Stats> getStatisticsForCurrentDay() {
-		String sql = "SELECT date_part('hour', s.date) || '-' || date_part('hour', s.date) + 1 as period," +
+		String sql = "SELECT HOUR(s.date) as period," +
 				" count(*) as sales_count , sum(s.cost) as cost_common, avg(s.cost) as cost_average," +
 				" sum(s.cost_with_discount) as cost_common_with_discounts, avg(s.cost_with_discount) as cost_average_with_discounts," +
 				" (sum(s.cost) - sum(s.cost_with_discount)) as discount_sum" +
 				" FROM sales s" +
-				" WHERE  date_part('day', s.date) = date_part('day', now())" +
-				" GROUP BY date_part('hour', s.date)";
+				" WHERE  DAY_OF_YEAR(s.date) = DAY_OF_YEAR(now())" +
+				" GROUP BY HOUR(s.date)";
 		return jdbcTemplate.query(sql, new BeanPropertyRowMapper(Stats.class));
 	}
 }

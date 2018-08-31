@@ -1,12 +1,3 @@
--- DROP DATABASE IF EXISTS salesystem;
--- CREATE DATABASE salesystem;
--- \c salesystem;
-
-DROP TABLE IF EXISTS sales CASCADE;
-DROP TABLE IF EXISTS products CASCADE;
-DROP TABLE IF EXISTS order_items CASCADE;
-DROP TABLE IF EXISTS discounts CASCADE;
-
 CREATE TABLE products (
   id    SERIAL PRIMARY KEY NOT NULL,
   name  VARCHAR            NOT NULL,
